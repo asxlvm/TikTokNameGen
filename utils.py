@@ -32,7 +32,7 @@ def get_option(chosen):
     """
     return chosen[0].upper()
 
-def get_colorful_text(attrs: tuple | list, text: str):
+def get_colorful_text(attrs: tuple or list, text: str):
     """
     Returns the text with the Colorama attributes passed in
     """
@@ -60,7 +60,7 @@ def surround_string(character: str, text: str):
         (character * char_len)
     )
 
-def get_input(prompt: str, answer_type, options: list) -> str | int:
+def get_input(prompt: str, answer_type, options: list) -> str or int:
     """
     Retries an input statement until the user correctly types an answer,
     returns the answer in the correct type which has been passed in.
