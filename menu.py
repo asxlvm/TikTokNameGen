@@ -6,7 +6,7 @@ every string delimited by a space in a file.
 """
 
 from threading import Thread
-from time import sleep, time
+from time import time
 from sys import exit as clean_exit
 from colorama import Fore, Style, init
 from colorama.ansi import set_title
@@ -187,9 +187,9 @@ class GenerateMenu:
             SUCCESS,
             f"\n{len(self.available)} available/banned out of {self.usernames_num}, " +
             f"checked {self.checked} usernames in {round(time() - start, 2)} seconds, " +
-            f"saved into: {save_to} - going into main menu in 10 seconds"
+            f"saved into: {save_to} - Press any key to go back to the main menu"
         )
-        sleep(10)
+        input()
         MainMenu().menu()
 
     def check(self, username: str, save_to: str) -> bool:
