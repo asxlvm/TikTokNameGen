@@ -6,7 +6,7 @@ every string delimited by a space in a file.
 """
 
 from threading import Thread
-from time import sleep
+from time import sleep, time
 from sys import exit as clean_exit
 from colorama import Fore, Style, init
 from colorama.ansi import set_title
@@ -161,6 +161,8 @@ class GenerateMenu:
         self.usernames_num = len(usernames)
         clear_screen()
 
+        start = time()
+
         if self.threaded:
             threads = []
 
@@ -184,6 +186,7 @@ class GenerateMenu:
         print_colorful_text(
             SUCCESS,
             f"\n{len(self.available)} available/banned out of {self.usernames_num}, " +
+            f"checked {self.checked} usernames in {round(time() - start, 2)} seconds, " +
             f"saved into: {save_to} - going into main menu in 10 seconds"
         )
         sleep(10)
