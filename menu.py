@@ -167,21 +167,21 @@ class GenerateMenu:
             threads = []
 
             for username in usernames:
-                threads.append(Thread(target=self.check, args=(username,)))
+                threads.append(Thread(target=self.check, args=(username,save_to)))
 
             for thread in threads:
                 thread.start()
         else:
             for username in usernames:
-                self.check(username)
+                self.check(username, save_to)
 
         checked_all = False
         while not checked_all:
             if self.checked >= len(usernames):
                 checked_all = True
 
-        with open(save_to, "w", encoding = "utf8") as file:
-            file.writelines(' '.join(self.available) + "\n")
+        with open(save_to, "a", encoding = "utf8") as file:
+            file.write("\n")
 
         print_colorful_text(
             SUCCESS,
@@ -192,7 +192,7 @@ class GenerateMenu:
         sleep(10)
         MainMenu().menu()
 
-    def check(self, username: str) -> bool:
+    def check(self, username: str, save_to: str) -> bool:
         """
         Returns True if the said username is available / banned
         """
@@ -229,6 +229,8 @@ class GenerateMenu:
                 f"{self.checked}/{self.usernames_num}: {username} - Available or Banned"
             )
             self.available.append(username)
+            with open(save_to, "a", encoding = "utf8") as file:
+                file.write(username + " ")
             to_return = True
 
         elif response == 0:
@@ -278,17 +280,17 @@ class MainMenu:
         option = get_input("What is your option?", str, ["G", "F", "C", "E"])
         option = get_option(option)
         if option == "G":
-                GenerateMenu(GENERATE)
+            GenerateMenu(GENERATE)
 
         elif option == "F":
-                GenerateMenu(FROM_FILE)
+            GenerateMenu(FROM_FILE)
 
         elif option == "C":
-                self.credits()
+            self.credits()
 
         elif option == "E":
-                clear_screen()
-                clean_exit()
+            clear_screen()
+            clean_exit()
 
     def credits(self):
         """
