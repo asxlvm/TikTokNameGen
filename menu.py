@@ -46,16 +46,15 @@ class GenerateMenu:
         self.checked = 1
         self.usernames_num = 0
 
-        match gen_type:
-            case 0:
-                self.str_type = "Generate"
-                set_title("Name Gen by @asxlvm [Gen Menu - Generate]")
-                self.menu(gen_type)
+        if gen_type == 0:
+            self.str_type = "Generate"
+            set_title("Name Gen by @asxlvm [Gen Menu - Generate]")
+            self.menu(gen_type)
 
-            case 1:
-                self.str_type = "From file"
-                set_title("Name Gen by @asxlvm [Gen Menu - From file]")
-                self.menu(gen_type)
+        elif gen_type == 1:
+            self.str_type = "From file"
+            set_title("Name Gen by @asxlvm [Gen Menu - From file]")
+            self.menu(gen_type)
 
     def menu(self, gen_type):
         """
@@ -74,57 +73,56 @@ class GenerateMenu:
             "If you wanna force-close the program hit Control (Ctrl) + C and Enter\n"
         )
         is_threaded = get_input("What is your option?", str, ["T", "N", "B"])
+        is_threaded = get_option(is_threaded)
 
-        match get_option(is_threaded):
-            case "T":
-                self.threaded = True
+        if is_threaded == "T":
+            self.threaded = True
 
-            case "N":
-                self.threaded = False
+        elif is_threaded == "N":
+            self.threaded = False
 
-            case "B":
-                MainMenu().menu()
+        elif is_threaded == "B":
+            MainMenu().menu()
 
-        match gen_type:
-            case 0:
-                username_len = int(get_input(
-                    "How many letters should the username have?",
-                    int,
-                    []
-                ))
-                save_to = get_input(
-                    "What is the filename I should save the working usernames to?",
-                    str,
-                    []
-                )
-                generate_amt = int(get_input(
-                    "How many usernames should I generate and check?",
-                    int,
-                    []
-                ))
+        if gen_type == 0:
+            username_len = int(get_input(
+                "How many letters should the username have?",
+                int,
+                []
+            ))
+            save_to = get_input(
+                "What is the filename I should save the working usernames to?",
+                str,
+                []
+            )
+            generate_amt = int(get_input(
+                "How many usernames should I generate and check?",
+                int,
+                []
+            ))
 
-                self.generate(
-                    username_len = username_len,
-                    generate_amt = generate_amt,
-                    save_to = save_to
-                )
+            self.generate(
+                username_len = username_len,
+                generate_amt = generate_amt,
+                save_to = save_to
+            )
 
-            case 1:
-                filename = get_input(
-                    "What is the name of the file you wanna check?",
-                    str,
-                    []
-                )
-                save_to = get_input(
-                    "What is the filename I should save the working usernames to?",
-                    str,
-                    []
-                )
+        elif gen_type == 1:
+            filename = get_input(
+                "What is the name of the file you wanna check?",
+                str,
+                []
+            )
+            save_to = get_input(
+                "What is the filename I should save the working usernames to?",
+                str,
+                []
+            )
 
-                self.generate(
-                    filename = filename,
-                    save_to = save_to
-                )
+            self.generate(
+                filename = filename,
+                save_to = save_to
+            )
 
     def get_usernames(self, generate_amt = 0, username_len = 0, filename = None) -> list:
         """
@@ -222,23 +220,22 @@ class GenerateMenu:
         except KeyboardInterrupt:
             clean_exit()
 
-        match response:
-            case 404:
-                print_colorful_text(
-                    SUCCESS,
-                    f"{self.checked}/{self.usernames_num}: {username} - Available or Banned"
-                )
-                self.available.append(username)
-                to_return = True
+        if response == 404:
+            print_colorful_text(
+                SUCCESS,
+                f"{self.checked}/{self.usernames_num}: {username} - Available or Banned"
+            )
+            self.available.append(username)
+            to_return = True
 
-            case 0:
-                pass
+        if response == 0:
+            pass
 
-            case _:
-                print_colorful_text(
-                    ERROR,
-                    f"{self.checked}/{self.usernames_num}: {username} - Not Available"
-                )
+        else:
+            print_colorful_text(
+                ERROR,
+                f"{self.checked}/{self.usernames_num}: {username} - Not Available"
+            )
 
         self.checked += 1
         return to_return
@@ -276,17 +273,17 @@ class MainMenu:
         )
 
         option = get_input("What is your option?", str, ["G", "F", "C", "E"])
-        match get_option(option):
-            case "G":
+        option = get_option(option)
+        if option == "G":
                 GenerateMenu(GENERATE)
 
-            case "F":
+        elif option == "F":
                 GenerateMenu(FROM_FILE)
 
-            case "C":
+        elif option == "C":
                 self.credits()
 
-            case "E":
+        elif option == "E":
                 clear_screen()
                 clean_exit()
 
