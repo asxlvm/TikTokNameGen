@@ -177,7 +177,7 @@ class GenerateMenu:
 
         checked_all = False
         while not checked_all:
-            if self.checked >= self.usernames_num:
+            if self.checked >= len(usernames):
                 checked_all = True
 
         with open(save_to, "w", encoding = "utf8") as file:
@@ -231,7 +231,7 @@ class GenerateMenu:
             self.available.append(username)
             to_return = True
 
-        if response == 0:
+        elif response == 0:
             pass
 
         else:
