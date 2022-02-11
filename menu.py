@@ -6,7 +6,7 @@ every string delimited by a space in a file.
 """
 
 from threading import Thread
-from time import time
+from time import sleep
 from sys import exit as clean_exit
 from colorama import Fore, Style, init
 from colorama.ansi import set_title
@@ -14,7 +14,7 @@ from pyfiglet import Figlet
 from requests import get
 from requests.exceptions import ConnectionError as RequestsConnectionErr
 from utils import surround_string, print_colorful_text, get_input, \
-    get_option, clear_screen, random_string
+    get_option, clear_screen, random_string, scrapeproxies, apicheck
 
 init() # Enables ANSI escaping on Windows
 
@@ -46,15 +46,16 @@ class GenerateMenu:
         self.checked = 1
         self.usernames_num = 0
 
-        if gen_type == 0:
-            self.str_type = "Generate"
-            set_title("Name Gen by @asxlvm [Gen Menu - Generate]")
-            self.menu(gen_type)
+        match gen_type:
+            case 0:
+                self.str_type = "Generate"
+                set_title("Name Gen by @asxlvm [Gen Menu - Generate]")
+                self.menu(gen_type)
 
-        elif gen_type == 1:
-            self.str_type = "From file"
-            set_title("Name Gen by @asxlvm [Gen Menu - From file]")
-            self.menu(gen_type)
+            case 1:
+                self.str_type = "From file"
+                set_title("Name Gen by @asxlvm [Gen Menu - From file]")
+                self.menu(gen_type)
 
     def menu(self, gen_type):
         """
@@ -73,56 +74,57 @@ class GenerateMenu:
             "If you wanna force-close the program hit Control (Ctrl) + C and Enter\n"
         )
         is_threaded = get_input("What is your option?", str, ["T", "N", "B"])
-        is_threaded = get_option(is_threaded)
 
-        if is_threaded == "T":
-            self.threaded = True
+        match get_option(is_threaded):
+            case "T":
+                self.threaded = True
 
-        elif is_threaded == "N":
-            self.threaded = False
+            case "N":
+                self.threaded = False
 
-        elif is_threaded == "B":
-            MainMenu().menu()
+            case "B":
+                MainMenu().menu()
 
-        if gen_type == 0:
-            username_len = int(get_input(
-                "How many letters should the username have?",
-                int,
-                []
-            ))
-            save_to = get_input(
-                "What is the filename I should save the working usernames to?",
-                str,
-                []
-            )
-            generate_amt = int(get_input(
-                "How many usernames should I generate and check?",
-                int,
-                []
-            ))
+        match gen_type:
+            case 0:
+                username_len = int(get_input(
+                    "How many letters should the username have?",
+                    int,
+                    []
+                ))
+                save_to = get_input(
+                    "What is the filename I should save the working usernames to?",
+                    str,
+                    []
+                )
+                generate_amt = int(get_input(
+                    "How many usernames should I generate and check?",
+                    int,
+                    []
+                ))
 
-            self.generate(
-                username_len = username_len,
-                generate_amt = generate_amt,
-                save_to = save_to
-            )
+                self.generate(
+                    username_len = username_len,
+                    generate_amt = generate_amt,
+                    save_to = save_to
+                )
 
-        elif gen_type == 1:
-            filename = get_input(
-                "What is the name of the file you wanna check?",
-                str,
-                []
-            )
-            save_to = get_input(
-                "What is the filename I should save the working usernames to?",
-                str,
-                []
-            )
+            case 1:
+                filename = get_input(
+                    "What is the name of the file you wanna check?",
+                    str,
+                    []
+                )
+                save_to = get_input(
+                    "What is the filename I should save the working usernames to?",
+                    str,
+                    []
+                )
 
-            self.generate(
-                filename = filename,
-                save_to = save_to
-            )
+                self.generate(
+                    filename = filename,
+                    save_to = save_to
+                )
 
     def get_usernames(self, generate_amt = 0, username_len = 0, filename = None) -> list:
         """
@@ -148,6 +150,12 @@ class GenerateMenu:
         Handles the checking and generating usernames
         """
 
+        scrapeproxies()
+        print_colorful_text(
+            SUCCESS,
+            "Scraped proxies!"
+        )
+
         if self.str_type == "Generate":
             usernames = self.get_usernames(
                 generate_amt = generate_amt,
@@ -161,38 +169,35 @@ class GenerateMenu:
         self.usernames_num = len(usernames)
         clear_screen()
 
-        start = time()
-
         if self.threaded:
             threads = []
 
             for username in usernames:
-                threads.append(Thread(target=self.check, args=(username,save_to)))
+                threads.append(Thread(target=self.check, args=(username,)))
 
             for thread in threads:
                 thread.start()
         else:
             for username in usernames:
-                self.check(username, save_to)
+                self.check(username)
 
         checked_all = False
         while not checked_all:
-            if self.checked >= len(usernames):
+            if self.checked >= self.usernames_num:
                 checked_all = True
 
-        with open(save_to, "a", encoding = "utf8") as file:
-            file.write("\n")
+        with open(save_to, "w", encoding = "utf8") as file:
+            file.writelines(' '.join(self.available) + "\n")
 
         print_colorful_text(
             SUCCESS,
             f"\n{len(self.available)} available/banned out of {self.usernames_num}, " +
-            f"checked {self.checked} usernames in {round(time() - start, 2)} seconds, " +
-            f"saved into: {save_to} - Press any key to go back to the main menu"
+            f"saved into: {save_to} - going into main menu in 10 seconds"
         )
-        input()
+        sleep(10)
         MainMenu().menu()
 
-    def check(self, username: str, save_to: str) -> bool:
+    def check(self, username: str) -> bool:
         """
         Returns True if the said username is available / banned
         """
@@ -223,24 +228,30 @@ class GenerateMenu:
         except KeyboardInterrupt:
             clean_exit()
 
-        if response == 404:
-            print_colorful_text(
-                SUCCESS,
-                f"{self.checked}/{self.usernames_num}: {username} - Available or Banned"
-            )
-            self.available.append(username)
-            with open(save_to, "a", encoding = "utf8") as file:
-                file.write(username + " ")
-            to_return = True
+        match response:
+            case 404:
+                apichecked = apicheck(username)
+                if apichecked is True:
+                    print_colorful_text(
+                        SUCCESS,
+                        f"{self.checked}/{self.usernames_num}: {username} - Available or Banned"
+                    )
+                    self.available.append(username)
+                    to_return = True
+                else:
+                    print_colorful_text(
+                        ERROR,
+                        f"{self.checked}/{self.usernames_num}: {username} - Not Available"
+                    )
 
-        elif response == 0:
-            pass
+            case 0:
+                pass
 
-        else:
-            print_colorful_text(
-                ERROR,
-                f"{self.checked}/{self.usernames_num}: {username} - Not Available"
-            )
+            case _:
+                print_colorful_text(
+                    ERROR,
+                    f"{self.checked}/{self.usernames_num}: {username} - Not Available"
+                )
 
         self.checked += 1
         return to_return
@@ -278,19 +289,19 @@ class MainMenu:
         )
 
         option = get_input("What is your option?", str, ["G", "F", "C", "E"])
-        option = get_option(option)
-        if option == "G":
-            GenerateMenu(GENERATE)
+        match get_option(option):
+            case "G":
+                GenerateMenu(GENERATE)
 
-        elif option == "F":
-            GenerateMenu(FROM_FILE)
+            case "F":
+                GenerateMenu(FROM_FILE)
 
-        elif option == "C":
-            self.credits()
+            case "C":
+                self.credits()
 
-        elif option == "E":
-            clear_screen()
-            clean_exit()
+            case "E":
+                clear_screen()
+                clean_exit()
 
     def credits(self):
         """
